@@ -1,53 +1,51 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Listado de Árboles</title>
-    <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
-</head>
-<body class="container mt-4">
+    <head>
+        <title>Listado de Árboles</title>
+        <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.7/css/bootstrap.min.css}">
+    </head>
+    <body class="container mt-4">
 
-<h2>Listado de Árboles</h2>
+        <h2>Listado de Árboles</h2>
 
-<a th:href="@{/arbol/nuevo}" class="btn btn-primary mb-3">Nuevo Árbol</a>
+        <a th:href="@{/arbol/nuevo}" class="btn btn-primary mb-3">Nuevo Árbol</a>
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Flor</th>
-            <th>Dureza</th>
-            <th>Altura</th>
-            <th>Imagen</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr th:each="arbol : ${arboles}">
-            <td th:text="${arbol.idArbol}"></td>
-            <td th:text="${arbol.nombreComun}"></td>
-            <td th:text="${arbol.tipoFlor}"></td>
-            <td th:text="${arbol.durezaMadera}"></td>
-            <td th:text="${arbol.durezaMadera}"></td>
-            <td th:text="${arbol.alturaPromedio}"></td>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Flor</th>
+                    <th>Dureza</th>
+                    <th>Altura</th>
+                    <th>Imagen</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="arbol : ${arboles}">
+                    <td th:text="${arbol.idArbol}"></td>
+                    <td th:text="${arbol.nombreComun}"></td>
+                    <td th:text="${arbol.tipoFlor}"></td>
+                    <td th:text="${arbol.durezaMadera}"></td>
+                    <td th:text="${arbol.alturaPromedio}"></td>
 
-            <td>
-                <img th:if="${arbol.rutaImagen != null and !#strings.isEmpty(arbol.rutaImagen)}"
-                     th:src="${arbol.rutaImagen}"
-                     width="80"
-                     class="img-thumbnail"/>
-            </td>
+                    <td>
+                        <img th:if="${arbol.rutaImagen != null and !#strings.isEmpty(arbol.rutaImagen)}"
+                             th:src="@{${arbol.rutaImagen}}"
+                             width="80">
+                    </td>
 
-            <td>
-                <a th:href="@{/arbol/editar/{id}(id=${arbol.idArbol})}" 
-                   class="btn btn-warning btn-sm">Editar</a>
+                    <td>
+                        <a th:href="@{/arbol/editar/{id}(id=${arbol.idArbol})}" 
+                           class="btn btn-warning btn-sm">Editar</a>
 
-                <a th:href="@{/arbol/eliminar/{id}(id=${arbol.idArbol})}" 
-                   class="btn btn-danger btn-sm">Eliminar</a>
-            </td>
-        </tr>
-    </tbody>
-</table>
+                        <a th:href="@{/arbol/eliminar/{id}(id=${arbol.idArbol})}" 
+                           class="btn btn-danger btn-sm">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
 
-</body>
+    </body>
 </html>

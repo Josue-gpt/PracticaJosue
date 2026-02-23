@@ -2,13 +2,16 @@
 <html xmlns:th="http://www.thymeleaf.org">
     <head>
         <title>Formulario Árbol</title>
-        <link th:href="@{/webjars/bootstrap/css/bootstrap.min.css}" rel="stylesheet"/>
+        <link rel="stylesheet" th:href="@{/webjars/bootstrap/5.3.7/css/bootstrap.min.css}">
     </head>
     <body class="container mt-4">
 
         <h2>Formulario Árbol</h2>
 
-        <form th:action="@{/arbol/guardar}" th:object="${arbol}" method="post">
+        <form th:action="@{/arbol/guardar}"
+              th:object="${arbol}"
+              method="post"
+              enctype="multipart/form-data">
 
             <input type="hidden" th:field="*{idArbol}" />
 
@@ -29,19 +32,43 @@
 
             <div class="mb-3">
                 <label>Altura promedio</label>
-                <input type="number" step="0.01" th:field="*{alturaPromedio}" class="form-control"/>
+                <input type="number" step="0.01"
+                       th:field="*{alturaPromedio}"
+                       class="form-control"/>
             </div>
 
             <div class="mb-3">
-                <label>Imagen (URL)</label>
-                <input type="text" name="rutaImagen" class="form-control"
-                       placeholder="https://ejemplo.com/imagen.jpg"/>
+                <label>Imagen</label>
+                <input type="file"
+                       name="imagenFile"
+                       class="form-control"
+                       accept="image/*"
+                       onchange="mostrarImagen(this);" />
+
+                <img id="preview"
+                     alt="imagen del árbol"
+                     style="display:none; margin-top:10px; max-height:200px;" />
             </div>
 
             <button type="submit" class="btn btn-success">Guardar</button>
             <a th:href="@{/arbol/listado}" class="btn btn-secondary">Volver</a>
 
         </form>
+
+        <script>
+            function mostrarImagen(input) {
+                const img = document.getElementById('preview');
+
+                if (!input.files || !input.files[0]) {
+                    img.style.display = 'none';
+                    img.removeAttribute('src');
+                    return;
+                }
+
+                img.style.display = 'block';
+                img.src = URL.createObjectURL(input.files[0]);
+            }
+        </script>
 
     </body>
 </html>
