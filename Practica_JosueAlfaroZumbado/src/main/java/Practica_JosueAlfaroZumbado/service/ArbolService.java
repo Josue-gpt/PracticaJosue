@@ -2,29 +2,30 @@ package Practica_JosueAlfaroZumbado.service;
 
 import Practica_JosueAlfaroZumbado.domain.Arbol;
 import Practica_JosueAlfaroZumbado.repository.ArbolRepository;
-import jakarta.transaction.Transactional;
 import java.io.IOException;
-import java.nio.file.*;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ArbolService {
 
     private final ArbolRepository arbolRepository;
+    private final FireBaseStorageService fireBaseStorageService;
 
-    public ArbolService(ArbolRepository arbolRepository) {
+    public ArbolService(ArbolRepository arbolRepository,
+                        FireBaseStorageService fireBaseStorageService) {
         this.arbolRepository = arbolRepository;
+        this.fireBaseStorageService = fireBaseStorageService;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<Arbol> listar() {
         return arbolRepository.findAll();
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Arbol obtenerPorId(Long id) {
         return arbolRepository.findById(id).orElse(null);
     }
@@ -35,27 +36,31 @@ public class ArbolService {
     }
 
     @Transactional
-    public void guardarConImagen(Arbol arbol, MultipartFile imagenFile) {
-        // Guardar primero para asegurar ID (si es nuevo)
-        arbol = arbolRepository.save(arbol);
+public void save(Arbol arbol, MultipartFile imagenFile) {
 
-        if (imagenFile != null && !imagenFile.isEmpty()) {
-            try {
-                String original = StringUtils.cleanPath(imagenFile.getOriginalFilename());
-                String nombreArchivo = arbol.getIdArbol() + "_" + original;
-
-                Path carpeta = Paths.get("src/main/resources/static/img");
-                Files.createDirectories(carpeta);
-
-                Path destino = carpeta.resolve(nombreArchivo);
-                Files.copy(imagenFile.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
-
-                arbol.setRutaImagen("/img/" + nombreArchivo);
-                arbolRepository.save(arbol);
-
-            } catch (IOException e) {
-                throw new RuntimeException("Error guardando la imagen", e);
+    // Si es edición y no viene rutaImagen en el form por alguna razón,
+    // recuperar el valor actual de BD.
+    if (arbol.getIdArbol() != null) {
+        Arbol actual = arbolRepository.findById(arbol.getIdArbol()).orElse(null);
+        if (actual != null) {
+            if (arbol.getRutaImagen() == null || arbol.getRutaImagen().isBlank()) {
+                arbol.setRutaImagen(actual.getRutaImagen());
             }
         }
     }
+
+    // Guardar cambios (nombre, flor, etc.)
+    arbol = arbolRepository.save(arbol);
+
+    // Si viene imagen nueva, subir y reemplazar URL
+    if (imagenFile != null && !imagenFile.isEmpty()) {
+        try {
+            String url = fireBaseStorageService.uploadImage(imagenFile, "arbol", arbol.getIdArbol());
+            arbol.setRutaImagen(url);
+            arbolRepository.save(arbol);
+        } catch (IOException e) {
+            throw new RuntimeException("Error subiendo imagen a Firebase", e);
+        }
+    }
+}
 }
